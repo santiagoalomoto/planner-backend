@@ -40,9 +40,9 @@ export class SectionsService {
   }
 
   findAll() {
-    return this.repo.find({
-      relations: ['offering', 'assigned_room', 'assigned_timeslot', 'teacher', 'semester'],
-    });
+    return this.repo
+      .find({ relations: ['offering', 'assigned_room', 'assigned_timeslot', 'teacher', 'semester'] })
+      .then((list) => list.map((s) => this._enrichSection(s)));
   }
 
   async findOne(id: string) {
@@ -51,6 +51,13 @@ export class SectionsService {
       relations: ['offering', 'assigned_room', 'assigned_timeslot', 'teacher', 'semester'],
     });
     if (!section) throw new NotFoundException('Sección no encontrada.');
+    return this._enrichSection(section);
+  }
+
+  private _enrichSection(section: Section) {
+    if (!section) return section;
+    // Crear una propiedad `name` que el frontend espera. Preferir code, luego id.
+    (section as any).name = section['name'] || section.code || section.id;
     return section;
   }
 
