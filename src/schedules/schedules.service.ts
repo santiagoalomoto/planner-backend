@@ -80,9 +80,9 @@ export class SchedulesService {
   }
 
   findAllRoomSchedules() {
-    return this.roomRepo.find({
-      relations: ['room', 'timeslot', 'section', 'semester'],
-    });
+    return this.roomRepo
+      .find({ relations: ['room', 'timeslot', 'section', 'semester'] })
+      .then((list) => list.map((r) => this._enrichSchedule(r)));
   }
 
   async findRoomSchedule(id: string) {
@@ -91,7 +91,7 @@ export class SchedulesService {
       relations: ['room', 'timeslot', 'section', 'semester'],
     });
     if (!r) throw new NotFoundException('Room schedule not found');
-    return r;
+    return this._enrichSchedule(r);
   }
 
   async updateRoomSchedule(id: string, dto: UpdateRoomScheduleDto) {
@@ -151,9 +151,9 @@ export class SchedulesService {
   }
 
   async findAllTeacherSchedules() {
-    return this.teacherScheduleRepo.find({
-      relations: ['teacher', 'timeslot', 'section', 'semester'],
-    });
+    return this.teacherScheduleRepo
+      .find({ relations: ['teacher', 'timeslot', 'section', 'semester'] })
+      .then((list) => list.map((r) => this._enrichSchedule(r)));
   }
 
   async findTeacherSchedule(id: string) {
@@ -162,7 +162,31 @@ export class SchedulesService {
       relations: ['teacher', 'timeslot', 'section', 'semester'],
     });
     if (!r) throw new NotFoundException('Teacher schedule not found');
-    return r;
+    return this._enrichSchedule(r);
+  }
+
+  // Helper: añade propiedades convenientes que el frontend espera
+  private _enrichSchedule(entity: any) {
+    if (!entity) return entity;
+
+    const timeslot = entity.timeslot || null;
+    const section = entity.section || null;
+
+    // Crear label legible para timeslot: p.ej. 'Lun 08:00-10:00'
+    if (timeslot) {
+      const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      const dayIndex = Math.max(1, Math.min(7, timeslot.day_of_week || 1)) - 1;
+      const dayLabel = days[dayIndex] || String(timeslot.day_of_week);
+      timeslot.label = `${dayLabel} ${timeslot.start_time}-${timeslot.end_time}`;
+    }
+
+    // Asegurar que exista section.name (frontend espera .name)
+    if (section) {
+      // Preferir code, luego id
+      section.name = section.name || section.code || section.id;
+    }
+
+    return { ...entity, timeslot, section };
   }
 
   async updateTeacherSchedule(id: string, dto: UpdateTeacherScheduleDto) {
