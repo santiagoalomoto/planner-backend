@@ -38,7 +38,7 @@ import { StudentSectionModule } from './student-section/student-section.module';
         database: config.get<string>('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true, // Solo en desarrollo
-        logging: false,
+        logging: true,
       }),
       inject: [ConfigService],
     }),
