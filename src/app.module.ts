@@ -19,6 +19,7 @@ import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ConflictsModule } from './conflicts/conflicts.module';
 import { AuditLogModule } from './audit/audit-log.module';
+import { CurriculumsModule } from './curriculums/curriculums.module';
 
 // 🔹 Agregado: módulo StudentSection
 import { StudentSectionModule } from './student-section/student-section.module';
@@ -53,6 +54,7 @@ import { StudentSectionModule } from './student-section/student-section.module';
     RoomsModule,
     TeachersModule,
     CoursesModule,
+    CurriculumsModule,
     OfferingsModule,
     SectionsModule,
     StudentsModule,

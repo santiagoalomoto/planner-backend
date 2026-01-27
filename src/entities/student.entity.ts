@@ -3,6 +3,7 @@ import { Enrollment } from './enrollment.entity';
 import { StudentSection } from './student-section.entity';
 import { Course } from './course.entity';
 import { Semester } from './semester.entity';
+import { Curriculum } from './curriculum.entity';
 
 @Entity({ name: 'students' })
 export class Student {
@@ -39,6 +40,14 @@ export class Student {
 
   @Column({ nullable: true })
   semesterId: string;
+
+  // Relación con Malla Curricular
+  @ManyToOne(() => Curriculum, (curriculum) => curriculum.students, { eager: true, nullable: true })
+  @JoinColumn({ name: 'curriculum_id' })
+  curriculum: Curriculum;
+
+  @Column({ nullable: true })
+  curriculum_id: number;
 
   // Relaciones con enrollments y studentSections
   @OneToMany(() => Enrollment, e => e.student)
