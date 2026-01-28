@@ -41,14 +41,32 @@ export class SectionsService {
 
   findAll() {
     return this.repo
-      .find({ relations: ['offering', 'assigned_room', 'assigned_timeslot', 'teacher', 'semester'] })
+      .find({ 
+        relations: [
+          'offering', 
+          'offering.course',
+          'offering.semester',
+          'assigned_room', 
+          'assigned_timeslot', 
+          'teacher', 
+          'semester'
+        ] 
+      })
       .then((list) => list.map((s) => this._enrichSection(s)));
   }
 
   async findOne(id: string) {
     const section = await this.repo.findOne({
       where: { id },
-      relations: ['offering', 'assigned_room', 'assigned_timeslot', 'teacher', 'semester'],
+      relations: [
+        'offering', 
+        'offering.course',
+        'offering.semester',
+        'assigned_room', 
+        'assigned_timeslot', 
+        'teacher', 
+        'semester'
+      ],
     });
     if (!section) throw new NotFoundException('Sección no encontrada.');
     return this._enrichSection(section);
@@ -58,6 +76,17 @@ export class SectionsService {
     if (!section) return section;
     // Crear una propiedad `name` que el frontend espera. Preferir code, luego id.
     (section as any).name = section['name'] || section.code || section.id;
+    // Exponer offeringId y offering.semesterId para el frontend
+    if (section.offering) {
+      (section as any).offeringId = section.offering.id;
+      // Exponer offering.semesterId si existe
+      if (section.offering.semester) {
+        (section.offering as any).semesterId = section.offering.semester.id;
+      } else if ((section.offering as any).semesterId) {
+        // fallback por si ya viene plano
+        (section.offering as any).semesterId = (section.offering as any).semesterId;
+      }
+    }
     return section;
   }
 
